@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <title>CogniPulse - Login</title>
+</head>
+<body class="bg-slate-100 h-screen flex items-center justify-center p-4">
+    <div class="bg-white p-10 rounded-[40px] shadow-2xl w-full max-w-md border border-slate-200">
+        <h1 class="text-3xl font-black text-indigo-600 mb-2 text-center tracking-tighter">CogniPulse</h1>
+        <p class="text-center text-slate-400 font-bold text-[10px] uppercase mb-8 tracking-[0.2em]">Login to HQ</p>
+        <div class="space-y-4">
+            <input type="email" id="email" placeholder="Email Address" class="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none focus:ring-2 focus:ring-indigo-500 transition">
+            <input type="password" id="pass" placeholder="Password" class="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none focus:ring-2 focus:ring-indigo-500 transition">
+            <button onclick="handleLogin()" class="w-full bg-indigo-600 text-white p-4 rounded-2xl font-bold shadow-lg hover:bg-indigo-700 transition">Log In</button>
+        </div>
+        <p class="mt-8 text-center text-sm text-slate-500 font-medium">New? <a href="signup.html" class="text-indigo-600 font-bold hover:underline">Sign Up</a></p>
+    </div>
+    <script>
+        async function handleLogin() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('pass').value;
+
+
+            
+
+
+        }
+    </script>
+</body>
+</html>

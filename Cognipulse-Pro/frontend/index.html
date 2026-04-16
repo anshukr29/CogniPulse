@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <title>CogniPulse - Dashboard</title>
+    <script>
+        if (localStorage.getItem('theme') === 'dark') { document.documentElement.classList.add('dark'); }
+        tailwind.config = { darkMode: 'class' }
+    </script>
+</head>
+
+<body class="bg-slate-100 dark:bg-zinc-950 flex h-screen p-4 gap-4 transition-colors duration-500">
+    <aside
+        class="w-64 bg-white dark:bg-zinc-900 rounded-3xl p-6 flex flex-col border border-slate-200 dark:border-zinc-800 shadow-sm transition-colors duration-500">
+        <h1 class="text-2xl font-black text-indigo-600 dark:text-indigo-400 mb-10 tracking-tighter">CogniPulse</h1>
+        <nav class="flex-1 space-y-2 text-sm font-bold">
+            <a href="index.html" class="flex items-center gap-3 p-3 rounded-xl bg-indigo-600 text-white shadow-lg">
+                Dashboard</a>
+            <a href=" "
+                class="flex items-center gap-3 p-3 rounded-xl text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-zinc-800 transition">
+                AI Chat</a>
+            <a href=" "
+                class="flex items-center gap-3 p-3 rounded-xl text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-zinc-800 transition">
+                Memory Logs</a>
+            <a href=" "
+                class="flex items-center gap-3 p-3 rounded-xl text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-zinc-800 transition">
+                Profile</a>
+        </nav>
+        <button onclick="toggleTheme()"
+            class="mt-auto p-3 bg-slate-50 dark:bg-zinc-800 rounded-xl font-bold text-xs dark:text-white border dark:border-zinc-700 transition">
+            <span id="theme-icon">🌙</span> Switch Theme
+        </button>
+        <button onclick="localStorage.clear(); window.location.replace('login.html')"
+            class="mt-4 text-red-500 font-bold p-3 text-sm">Logout</button>
+    </aside>
+
+    <main
+        class="flex-1 bg-white dark:bg-zinc-900 rounded-3xl border border-slate-200 dark:border-zinc-800 flex flex-col items-center justify-center transition-colors duration-500 shadow-sm">
+        <div class="text-center">
+            <h2 class="text-4xl font-black text-slate-800 dark:text-white mb-4">Namaste, <span id="dash-name"
+                    class="text-indigo-600 dark:text-indigo-400"></span>!</h2>
+            <p
+                class="text-slate-400 dark:text-slate-500 mb-10 font-bold text-sm tracking-widest uppercase tracking-widest">
+                Neural link active</p>
+            <a href="chat.html"
+                class="bg-indigo-600 text-white px-10 py-4 rounded-2xl font-black shadow-xl hover:scale-105 transition-all">LAUNCH
+                COGNICHAT</a>
+        </div>
+    </main>
+
+    <script>
+
+
+
+        function toggleTheme() {
+            const isDark = document.documentElement.classList.toggle('dark');
+            localStorage.setItem('theme', isDark ? 'dark' : 'light');
+            document.getElementById('theme-icon').innerText = isDark ? '☀️' : '🌙';
+        }
+
+
+        if (localStorage.getItem('theme') === 'dark') {
+            document.getElementById('theme-icon').innerText = '☀️';
+        }
+
+    </script>
+</body>
+
+</html>
