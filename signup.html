@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <title>CogniPulse - Join</title>
+    <style>
+        body {
+            background-color: #0f172a;
+            position: relative;
+            overflow: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: absolute;
+            width: 450px;
+            height: 450px;
+            background: #9333ea;
+            border-radius: 50%;
+            top: -100px;
+            left: -100px;
+            filter: blur(120px);
+            z-index: 0;
+            animation: floatOrb 10s infinite alternate ease-in-out;
+        }
+
+        body::after {
+            content: '';
+            position: absolute;
+            width: 400px;
+            height: 400px;
+            background: #10b981;
+            border-radius: 50%;
+            bottom: -150px;
+            right: -100px;
+            filter: blur(120px);
+            z-index: 0;
+            animation: floatOrb 12s infinite alternate-reverse ease-in-out;
+        }
+
+        @keyframes floatOrb {
+            0% { transform: translate(0, 0) scale(1); }
+            100% { transform: translate(150px, 100px) scale(1.2); }
+        }
+    </style>
+</head>
+
+<body class="h-screen flex items-center justify-center p-4">
+
+    <div class="relative z-10 bg-slate-900/40 backdrop-blur-2xl p-10 rounded-[40px] shadow-[0_8px_32px_0_rgba(0,0,0,0.5)] w-full max-w-md border border-white/10">
+
+        <h1 class="text-3xl font-black text-white mb-2 text-center tracking-tighter drop-shadow-md">CogniPulse</h1>
+        <p class="text-center text-emerald-400 font-bold text-[10px] uppercase mb-8 tracking-[0.2em]">Create Neural Profile</p>
+
+        <div class="space-y-4">
+            <input type="text" id="name" placeholder="Full Name"
+                class="w-full p-4 bg-white/5 border border-white/10 rounded-2xl outline-none focus:ring-2 focus:ring-emerald-500 text-white placeholder-white/40 transition duration-300 shadow-inner">
+
+            <input type="email" id="email" placeholder="Email Address"
+                class="w-full p-4 bg-white/5 border border-white/10 rounded-2xl outline-none focus:ring-2 focus:ring-emerald-500 text-white placeholder-white/40 transition duration-300 shadow-inner">
+
+            <input type="password" id="pass" placeholder="Password"
+                class="w-full p-4 bg-white/5 border border-white/10 rounded-2xl outline-none focus:ring-2 focus:ring-emerald-500 text-white placeholder-white/40 transition duration-300 shadow-inner">
+
+            <button onclick="handleSignup()" id="signupBtn"
+                class="w-full bg-emerald-500 text-slate-900 p-4 rounded-2xl font-black shadow-[0_4px_15px_rgba(16,185,129,0.3)] hover:shadow-[0_4px_25px_rgba(16,185,129,0.5)] hover:scale-[1.02] active:scale-95 transition-all duration-300">Sign Up</button>
+        </div>
+
+        <p class="mt-8 text-center text-sm text-slate-400 font-medium">Account hai? <a href="login.html"
+                class="text-purple-400 font-bold hover:text-purple-300 transition hover:underline">Log In</a></p>
+    </div>
+
+    <script>
+        async function handleSignup() {
+            const btn = document.getElementById('signupBtn');
+            const originalText = btn.innerText;
+
+            const name = document.getElementById('name').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('pass').value;
+
+             if (!name || !email || !password) {
+                alert("Please fill all the fields!");
+                return;
+            }
+
+             const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+            if (!emailRegex.test(email)) {
+                alert("Invalid format! Please enter a correct email address (e.g., anshu123@gmail.com).");
+                return;
+            }
+
+             btn.innerText = "Processing...";
+
+            try {
+                const res = await fetch('http://localhost:8000/api/signup', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, email, password })
+                });
+
+                if (res.ok) {
+                    alert("Account created!");
+                    window.location.href = 'login.html';
+                } else {
+                    alert("Signup failed! Email might already be registered.");
+                    btn.innerText = originalText;
+                }
+            } catch (e) {
+                alert("Backend offline!");
+                btn.innerText = originalText;
+            }
+        }
+    </script>
+</body>
+
+</html> 
