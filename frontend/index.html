@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="en" id="root">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <title>CogniPulse - Dashboard</title>
+
+    <style>
+        @keyframes gradient-move {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .animate-bg {
+            background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
+            background-size: 400% 400%;
+            animation: gradient-move 15s ease infinite;
+        }
+
+        .dark .animate-bg {
+            background: linear-gradient(-45deg, #0f172a, #1e1b4b, #312e81, #1e1b4b);
+            background-size: 400% 400%;
+        }
+
+        .glass {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .dark .glass {
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+         @keyframes gemini-breathe {
+            0%, 100% { transform: scale(1); opacity: 0.7; filter: blur(2px); }
+            50% { transform: scale(1.4); opacity: 1; filter: blur(6px); }
+        }
+
+        .gemini-orb {
+            background: radial-gradient(circle at center, rgba(99, 102, 241, 0.8), transparent);
+            animation: gemini-breathe 3s ease-in-out infinite;
+        }
+
+         ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(99, 102, 241, 0.5); border-radius: 10px; }
+
+         .modal-enter { animation: modalIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        @keyframes modalIn {
+            from { opacity: 0; transform: scale(0.95) translateY(20px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+    </style>
+
+    <script>
+        if (localStorage.getItem('theme') === 'dark') { document.documentElement.classList.add('dark'); }
+        tailwind.config = { darkMode: 'class' }
+    </script>
+</head>
+
+<body class="animate-bg flex h-screen w-screen p-4 gap-4 transition-colors duration-500">
+
+    <aside class="glass w-64 rounded-[30px] p-6 flex flex-col shadow-xl transition-all duration-500 flex-shrink-0 z-10">
+        <h1 class="text-3xl font-black text-indigo-600 dark:text-transparent dark:bg-clip-text dark:bg-gradient-to-r dark:from-white dark:to-indigo-400 mb-10 tracking-tight">
+            CogniPulse
+        </h1>
+
+        <nav class="flex-1 space-y-2 text-sm font-bold">
+            <a href="index.html" class="flex items-center gap-3 p-3 rounded-lg bg-indigo-600 dark:bg-indigo-500/20 dark:border-l-4 dark:border-indigo-400 text-white dark:text-indigo-300 shadow-lg transition">
+                <span class="text-xl">📊</span> Dashboard
+            </a>
+            <a href="chat.html" class="flex items-center gap-3 p-3 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-white/50 dark:hover:bg-black/20 transition">
+                <span class="text-xl">🧠</span> AI Chat
+            </a>
+            <a href="memory.html" class="flex items-center gap-3 p-3 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-white/50 dark:hover:bg-black/20 transition">
+                <span class="text-xl">📜</span> Memory Logs
+            </a>
+            <a href="profile.html" class="flex items-center gap-3 p-3 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-white/50 dark:hover:bg-black/20 transition">
+                <span class="text-xl">👤</span> Profile
+            </a>
+        </nav>
+
+        <button onclick="toggleTheme()" class="mt-auto p-3 bg-white/50 dark:bg-black/20 rounded-xl font-bold text-xs text-slate-700 dark:text-white border border-white/20 transition shadow-sm mb-3">
+            <span id="theme-icon">🌙</span> Switch Theme
+        </button>
+
+        <button onclick="localStorage.clear(); window.location.replace('login.html')" class="text-red-500 font-bold p-3 text-sm hover:bg-red-500/10 rounded-xl transition">
+            Logout
+        </button>
+    </aside>
+
+    <main class="flex-1 glass rounded-[40px] flex flex-col p-10 transition-all duration-500 shadow-2xl relative overflow-y-auto z-10">
+        
+        <div class="w-full flex flex-col items-center justify-center mt-10 mb-20 z-10">
+            <div class="flex items-center gap-3 mb-6 bg-white/50 dark:bg-black/20 px-5 py-2 rounded-full border border-white/30 dark:border-white/10 shadow-sm">
+                <div class="w-3 h-3 rounded-full gemini-orb"></div>
+                <span class="text-slate-600 dark:text-slate-300 font-bold text-xs tracking-widest uppercase">Neural link active</span>
+            </div>
+
+            <h2 class="text-5xl font-black text-slate-800 dark:text-white mb-10 tracking-tight drop-shadow-md text-center">
+                Namaste, <br />
+                <span id="dash-name" class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 to-purple-500 dark:from-white dark:to-indigo-400"></span>!
+            </h2>
+
+            <div class="relative group mt-4">
+                <div class="absolute -inset-1 rounded-2xl gemini-orb opacity-40 group-hover:opacity-100 transition duration-500"></div>
+                <a href="chat.html" class="relative bg-indigo-600 hover:bg-indigo-700 text-white px-10 py-5 rounded-2xl font-black tracking-widest uppercase shadow-xl hover:scale-[1.02] transition-transform flex items-center justify-center gap-3 text-lg border border-white/10">
+                    <span>LAUNCH COGNICHAT</span>
+                    <span>🚀</span>
+                </a>
+            </div>
+        </div>
+
+        <div class="w-full max-w-4xl mx-auto pb-10">
+            <h3 class="text-xs font-black text-slate-500 dark:text-slate-400 uppercase tracking-[0.2em] mb-4 text-center">Interactive Arena</h3>
+            
+            <div onclick="openDrillModal()" class="bg-gradient-to-br from-red-500 to-orange-500 rounded-[30px] p-8 text-white relative overflow-hidden shadow-xl hover:-translate-y-1 transition-transform cursor-pointer group border border-white/20">
+                <div class="absolute -right-10 -top-10 w-40 h-40 bg-white/20 rounded-full blur-2xl group-hover:bg-white/30 transition"></div>
+                <div class="flex items-center justify-between relative z-10">
+                    <div class="flex items-center gap-4">
+                        <div class="w-14 h-14 bg-white/20 rounded-2xl flex items-center justify-center text-3xl border border-white/30 shadow-inner backdrop-blur-sm">⚡</div>
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <h4 class="text-2xl font-black tracking-tight drop-shadow-sm">Adaptive Drill</h4>
+                                <span class="bg-white text-red-600 text-[10px] px-2 py-1 rounded-md font-black uppercase tracking-widest">Live MCQ Test</span>
+                            </div>
+                            <p class="text-white/90 text-sm font-bold mt-1">Unlimited AI-Generated Questions Engine</p>
+                        </div>
+                    </div>
+                    <div class="bg-white/20 hover:bg-white/30 backdrop-blur-sm px-6 py-3 rounded-xl text-sm font-bold transition flex items-center gap-2">
+                        Enter Arena <span>→</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="w-full max-w-4xl mx-auto pb-10">
+            <h3 class="text-xs font-black text-slate-500 dark:text-slate-400 uppercase tracking-[0.2em] mb-4 text-center">iNSIGHTS Integration: Neural Structure Engine</h3>
+            
+            <div class="bg-white/30 dark:bg-black/20 rounded-[30px] p-8 border border-white/20 dark:border-white/5 shadow-inner relative overflow-hidden">
+                <div class="relative z-10">
+                    <div class="flex items-center justify-between mb-6">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 bg-indigo-500/20 rounded-xl flex items-center justify-center text-xl border border-indigo-500/30">🛠️</div>
+                            <div>
+                                <h4 class="text-xl font-bold text-slate-800 dark:text-white">AI To-Do Engine</h4>
+                                <p class="text-slate-600 dark:text-slate-400 text-xs" id="engine-status">Converts chaos into structured execution</p>
+                            </div>
+                        </div>
+                        
+                         <div id="active-tasks-badge" class="hidden items-center gap-2 px-3 py-1 bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 border border-emerald-500/30 rounded-full text-[10px] font-bold uppercase tracking-wider">
+                            Active Plan
+                        </div>
+                    </div>
+
+                    <div class="flex gap-4 mb-8">
+                        <input type="text" id="goal-input" placeholder="Enter a broad goal (e.g., Master Node.js or Prep for SSC)..." 
+                            class="flex-1 bg-white/50 dark:bg-black/30 border border-white/50 dark:border-zinc-700 rounded-2xl px-6 py-4 outline-none focus:ring-2 focus:ring-indigo-500 text-sm transition-all text-slate-800 dark:text-white">
+                        <button onclick="structureTask()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-8 rounded-2xl font-black text-xs uppercase tracking-widest shadow-lg transition-transform hover:scale-105">
+                            Structure It
+                        </button>
+                        <button onclick="clearRoadmap()" class="bg-red-500/20 text-red-600 dark:text-red-400 border border-red-500/30 hover:bg-red-500/30 px-4 rounded-2xl font-bold transition" title="Clear Plan">
+                           ✕
+                        </button>
+                    </div>
+
+                    <div id="roadmap-container" class="space-y-3"></div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <div id="drill-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/60 backdrop-blur-md transition-opacity">
+        <div class="glass dark:bg-slate-900/90 w-full max-w-2xl rounded-[40px] p-8 shadow-2xl border border-white/20 dark:border-slate-700 modal-enter relative">
+            
+            <button onclick="closeDrillModal()" class="absolute top-6 right-6 text-slate-400 hover:text-red-500 transition text-xl">✖</button>
+
+            <div class="flex items-center gap-4 mb-6">
+                <div class="w-12 h-12 bg-red-500/20 rounded-2xl flex items-center justify-center text-2xl border border-red-500/30">🤖</div>
+                <div>
+                    <h2 class="text-2xl font-black text-slate-800 dark:text-white tracking-tight">AI Drill Master</h2>
+                    <p class="text-slate-500 dark:text-slate-400 text-xs font-bold uppercase tracking-widest">Topic: <span id="drill-topic-badge" class="text-indigo-500">PENDING SETUP</span></p>
+                </div>
+            </div>
+
+            <div id="drill-setup-area" class="text-center py-6">
+                <h3 class="text-xl font-bold text-slate-800 dark:text-white mb-2">Choose Your Battlefield</h3>
+                <p class="text-xs text-slate-500 mb-6">Enter any topic. CogniPulse will generate unlimited questions on the fly.</p>
+                
+                <input type="text" id="drill-topic-input" placeholder="e.g., Next.js, Cloud Computing, Indian Polity, DSA..." 
+                    class="w-full bg-white/50 dark:bg-black/30 border border-white/50 dark:border-slate-700 rounded-2xl p-4 outline-none focus:ring-2 focus:ring-red-500 text-sm transition-all text-slate-800 dark:text-white mb-4 text-center font-bold">
+                
+                <button onclick="startDrill()" id="init-drill-btn" class="w-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white py-4 rounded-2xl font-black uppercase tracking-widest shadow-lg hover:scale-[1.02] transition-transform">
+                    Initialize Challenge
+                </button>
+            </div>
+
+            <div id="drill-loading-area" class="hidden text-center py-10">
+                <div class="w-10 h-10 rounded-full gemini-orb mx-auto mb-4"></div>
+                <h3 class="text-lg font-bold text-indigo-500 animate-pulse">Neural AI is synthesizing questions...</h3>
+                <p class="text-xs text-slate-400 mt-2">Connecting to Backend API</p>
+            </div>
+
+            <div id="drill-question-area" class="hidden bg-white/50 dark:bg-black/30 rounded-3xl p-6 border border-white/50 dark:border-slate-700 mb-6 relative overflow-hidden">
+                <div class="absolute top-0 left-0 w-full h-1 bg-slate-200 dark:bg-slate-800">
+                    <div id="timer-bar" class="h-full bg-red-500 transition-all duration-1000 w-full"></div>
+                </div>
+
+                <div class="flex justify-between items-start mb-4 mt-2">
+                    <span id="question-number-badge" class="bg-red-500 text-white text-[10px] font-black px-2 py-1 rounded-md uppercase tracking-widest">Question 1</span>
+                    <span id="timer-text" class="text-red-500 font-black font-mono text-lg flex items-center gap-1">⏱️ 30s</span>
+                </div>
+                
+                <p id="question-text" class="text-lg font-bold text-slate-800 dark:text-white leading-relaxed"></p>
+            </div>
+
+            <div id="drill-input-area" class="hidden grid grid-cols-1 md:grid-cols-2 gap-4">
+                <button onclick="selectOption(0)" class="option-btn text-left p-4 bg-white/50 dark:bg-black/30 border border-white/50 dark:border-slate-700 rounded-2xl hover:bg-indigo-500/20 hover:border-indigo-500 transition-all font-bold text-sm text-slate-800 dark:text-white"></button>
+                <button onclick="selectOption(1)" class="option-btn text-left p-4 bg-white/50 dark:bg-black/30 border border-white/50 dark:border-slate-700 rounded-2xl hover:bg-indigo-500/20 hover:border-indigo-500 transition-all font-bold text-sm text-slate-800 dark:text-white"></button>
+                <button onclick="selectOption(2)" class="option-btn text-left p-4 bg-white/50 dark:bg-black/30 border border-white/50 dark:border-slate-700 rounded-2xl hover:bg-indigo-500/20 hover:border-indigo-500 transition-all font-bold text-sm text-slate-800 dark:text-white"></button>
+                <button onclick="selectOption(3)" class="option-btn text-left p-4 bg-white/50 dark:bg-black/30 border border-white/50 dark:border-slate-700 rounded-2xl hover:bg-indigo-500/20 hover:border-indigo-500 transition-all font-bold text-sm text-slate-800 dark:text-white"></button>
+            </div>
+
+            <div id="drill-feedback-area" class="hidden space-y-4 mt-6">
+                <div id="feedback-box" class="p-5 rounded-2xl border flex items-start gap-4">
+                    <div id="feedback-icon" class="text-3xl mt-1"></div>
+                    <div>
+                        <h4 id="feedback-title" class="text-lg font-black mb-1"></h4>
+                        <p id="feedback-text" class="text-sm text-slate-600 dark:text-slate-300"></p>
+                    </div>
+                </div>
+                
+                <div class="flex gap-4">
+                    <button onclick="nextQuestion()" class="flex-1 bg-gradient-to-r from-indigo-600 to-purple-600 text-white py-4 rounded-2xl font-black uppercase tracking-widest shadow-lg hover:scale-[1.02] transition-transform">
+                        Next Question ⏭️
+                    </button>
+                    <button onclick="closeDrillModal()" class="flex-1 bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-white py-4 rounded-2xl font-black uppercase tracking-widest hover:bg-slate-300 dark:hover:bg-slate-700 transition">
+                        Exit Session
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        // Auth check & Username
+        const UID = localStorage.getItem('uid') || 'test_user';
+        if (!localStorage.getItem('uid')) window.location.href = 'login.html';
+        const userName = localStorage.getItem('uname') || "OPERATOR";
+        document.getElementById('dash-name').innerText = userName.toUpperCase();
+
+        function toggleTheme() {
+            const isDark = document.documentElement.classList.toggle('dark');
+            localStorage.setItem('theme', isDark ? 'dark' : 'light');
+            document.getElementById('theme-icon').innerText = isDark ? '☀️' : '🌙';
+        }
+        if (localStorage.getItem('theme') === 'dark') { document.getElementById('theme-icon').innerText = '☀️'; }
+
+       
+        //  INFINITE BACKEND-CONNECTED MCQ LOGIC 
+         
+        let timerInterval;
+        let timeLeft = 30;
+        let activeQuestionData = {};
+        let questionCount = 0;
+        let currentQuestionBank = [];
+        let currentQuestionIndex = 0;
+
+         async function fetchAIQuestions(topic) {
+            try {
+                 const aiPrompt = `Generate exactly 3 advanced multiple-choice questions about '${topic}'. Reply ONLY with a valid JSON array. Format: [{"q": "Question here?", "options": ["A", "B", "C", "D"], "correct": 0, "exp": "Explanation of correct answer"}]. Make 'correct' an integer 0-3.`;
+
+                const res = await fetch('http://localhost:8000/api/chat', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ message: aiPrompt, user_id: UID })
+                });
+
+                const data = await res.json();
+                
+                 let cleanJsonStr = data.reply.replace(/```json/g, '').replace(/```/g, '').trim();
+                let parsedQuestions = JSON.parse(cleanJsonStr);
+                
+                return parsedQuestions;
+
+            } catch (error) {
+                console.error("AI API Error, using fallback bank...", error);
+                 return [
+                    { q: `Which concept is central to understanding advanced ${topic.toUpperCase()}?`, options: [`Modularity`, `Sequential redundancy`, `Manual memory allocation`, `Deprecated functions`], correct: 0, exp: `${topic} heavily relies on modular design and separation of concerns.` },
+                    { q: `When optimizing ${topic.toUpperCase()}, what is the primary bottleneck?`, options: ["CPU rendering", "Data I/O Operations", "Syntax highlighting", "Variable naming"], correct: 1, exp: "Data Input/Output is universally the most common bottleneck in systems." },
+                    { q: `What is the best practice for deploying ${topic.toUpperCase()}?`, options: ["Manual FTP upload", "Continuous Integration / Continuous Deployment (CI/CD)", "Copy-pasting files", "Emailing the zip file"], correct: 1, exp: "CI/CD pipelines automate testing and deployment, making it the industry standard." }
+                ];
+            }
+        }
+
+        function openDrillModal() {
+            const modal = document.getElementById('drill-modal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            
+            document.getElementById('drill-setup-area').classList.remove('hidden');
+            document.getElementById('drill-loading-area').classList.add('hidden');
+            document.getElementById('drill-question-area').classList.add('hidden');
+            document.getElementById('drill-input-area').classList.add('hidden');
+            document.getElementById('drill-feedback-area').classList.add('hidden');
+            
+            document.getElementById('drill-topic-input').value = "";
+            document.getElementById('drill-topic-badge').innerText = "PENDING SETUP";
+            clearInterval(timerInterval);
+        }
+
+        async function startDrill() {
+            const topic = document.getElementById('drill-topic-input').value.trim();
+            if(!topic) return alert("Please enter a topic to begin!");
+            
+            document.getElementById('drill-topic-badge').innerText = topic.toUpperCase();
+            
+             document.getElementById('drill-setup-area').classList.add('hidden');
+            document.getElementById('drill-loading-area').classList.remove('hidden');
+
+             currentQuestionBank = await fetchAIQuestions(topic);
+            
+            questionCount = 1;
+            currentQuestionIndex = 0;
+            
+            document.getElementById('drill-loading-area').classList.add('hidden');
+            loadQuestionUI();
+        }
+
+        async function loadQuestionUI() {
+            
+            if (currentQuestionIndex >= currentQuestionBank.length) {
+                document.getElementById('drill-question-area').classList.add('hidden');
+                document.getElementById('drill-input-area').classList.add('hidden');
+                document.getElementById('drill-feedback-area').classList.add('hidden');
+                
+                document.getElementById('drill-loading-area').classList.remove('hidden');
+                const topic = document.getElementById('drill-topic-input').value.trim();
+                
+                // Fetch next batch
+                const newBatch = await fetchAIQuestions(topic + " - Give different advanced questions this time");
+                currentQuestionBank = newBatch;
+                currentQuestionIndex = 0;
+                
+                document.getElementById('drill-loading-area').classList.add('hidden');
+            }
+
+            activeQuestionData = currentQuestionBank[currentQuestionIndex];
+            
+            document.getElementById('drill-question-area').classList.remove('hidden');
+            document.getElementById('drill-input-area').classList.remove('hidden');
+            document.getElementById('drill-input-area').classList.add('grid');
+            document.getElementById('drill-feedback-area').classList.add('hidden');
+            
+            document.getElementById('question-number-badge').innerText = `Question ${questionCount}`;
+            document.getElementById('question-text').innerText = activeQuestionData.q;
+            
+            const optionBtns = document.querySelectorAll('.option-btn');
+            optionBtns.forEach((btn, index) => {
+                btn.innerText = activeQuestionData.options[index] || "N/A";
+                btn.disabled = false;
+                btn.classList.remove('bg-emerald-500/20', 'border-emerald-500', 'bg-red-500/20', 'border-red-500', 'opacity-50');
+            });
+            
+            timeLeft = 30;
+            document.getElementById('timer-bar').style.width = "100%";
+            document.getElementById('timer-text').innerText = `⏱️ ${timeLeft}s`;
+            document.getElementById('timer-text').classList.remove('animate-pulse');
+            
+            clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                document.getElementById('timer-text').innerText = `⏱️ ${timeLeft}s`;
+                document.getElementById('timer-bar').style.width = `${(timeLeft / 30) * 100}%`;
+                
+                if(timeLeft <= 10) { document.getElementById('timer-text').classList.add('animate-pulse'); }
+                if(timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    selectOption(-1); // Timeout
+                }
+            }, 1000);
+        }
+
+        function nextQuestion() {
+            questionCount++;
+            currentQuestionIndex++;
+            loadQuestionUI();
+        }
+
+        function closeDrillModal() {
+            clearInterval(timerInterval);
+            const modal = document.getElementById('drill-modal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        function selectOption(selectedIndex) {
+            clearInterval(timerInterval);
+            
+            const optionBtns = document.querySelectorAll('.option-btn');
+            optionBtns.forEach(btn => btn.disabled = true); 
+            
+            const isCorrect = (selectedIndex === activeQuestionData.correct);
+            
+            if (selectedIndex !== -1) {
+                if(isCorrect) {
+                    optionBtns[selectedIndex].classList.add('bg-emerald-500/20', 'border-emerald-500');
+                } else {
+                    optionBtns[selectedIndex].classList.add('bg-red-500/20', 'border-red-500'); 
+                    optionBtns[activeQuestionData.correct].classList.add('bg-emerald-500/20', 'border-emerald-500'); 
+                }
+            } else {
+                optionBtns[activeQuestionData.correct].classList.add('bg-emerald-500/20', 'border-emerald-500');
+            }
+
+            optionBtns.forEach((btn, index) => {
+                if(index !== selectedIndex && index !== activeQuestionData.correct) {
+                    btn.classList.add('opacity-50');
+                }
+            });
+
+            setTimeout(() => {
+                document.getElementById('drill-input-area').classList.add('hidden');
+                document.getElementById('drill-input-area').classList.remove('grid');
+                
+                const feedbackArea = document.getElementById('drill-feedback-area');
+                const feedbackBox = document.getElementById('feedback-box');
+                const icon = document.getElementById('feedback-icon');
+                const title = document.getElementById('feedback-title');
+                const text = document.getElementById('feedback-text');
+
+                feedbackArea.classList.remove('hidden');
+
+                if(isCorrect) {
+                    feedbackBox.className = "p-5 rounded-2xl border border-emerald-500/30 bg-emerald-500/10 flex items-start gap-4";
+                    icon.innerText = "✅";
+                    title.className = "text-lg font-black mb-1 text-emerald-600 dark:text-emerald-400";
+                    title.innerText = "Correct!";
+                } else if (selectedIndex === -1) {
+                    feedbackBox.className = "p-5 rounded-2xl border border-orange-500/30 bg-orange-500/10 flex items-start gap-4";
+                    icon.innerText = "⏳";
+                    title.className = "text-lg font-black mb-1 text-orange-600 dark:text-orange-400";
+                    title.innerText = "Time's Up!";
+                } else {
+                    feedbackBox.className = "p-5 rounded-2xl border border-red-500/30 bg-red-500/10 flex items-start gap-4";
+                    icon.innerText = "❌";
+                    title.className = "text-lg font-black mb-1 text-red-600 dark:text-red-400";
+                    title.innerText = "Incorrect";
+                }
+                text.innerHTML = `<b>AI Explanation:</b> ${activeQuestionData.exp}`;
+            }, 800); 
+        }
+
+        
+        // SMART AI TO-DO ENGINE  
+         
+        let currentTasks = [];
+
+        window.addEventListener('DOMContentLoaded', () => {
+            const savedTasks = localStorage.getItem('aiRoadmap');
+            if(savedTasks) {
+                currentTasks = JSON.parse(savedTasks);
+                renderTasks();
+            } else {
+                showEmptyState();
+            }
+        });
+
+        function showEmptyState() {
+             document.getElementById('roadmap-container').innerHTML = `
+                <p class="text-center text-slate-500 dark:text-slate-400 text-xs italic py-10 border-2 border-dashed border-slate-300 dark:border-slate-700 rounded-2xl bg-white/20 dark:bg-black/10">
+                    Enter a goal above to generate an AI-structured roadmap.
+                </p>`;
+             document.getElementById('active-tasks-badge').classList.add('hidden');
+        }
+
+        function generateSmartSteps(goalText) {
+            const text = goalText.toLowerCase();
+            let steps = [];
+            
+            if (text.includes("html") || text.includes("css") || text.includes("frontend")) {
+                steps = [`Understand basic tags and semantic web`, `Master Flexbox and Grid layouts`, `Build 2 responsive landing pages`];
+            } else if (text.includes("react") || text.includes("mern")) {
+                steps = [`Clear concepts: Components, State, and Props`, `Master Hooks (useEffect, useState)`, `Build an interactive app using ${goalText}`];
+            } else if (text.includes("node") || text.includes("backend")) {
+                steps = [`Set up server environment and basic routing`, `Connect Database and create CRUD operations`, `Implement Authentication JWT`];
+            } else if (text.includes("ssc") || text.includes("exam") || text.includes("jpsc")) {
+                steps = [`Gather syllabus and previous year questions`, `Practice core concepts and mock tests`, `Revise formulas/facts daily`];
+            } else {
+                steps = [`Research the core fundamentals of ${goalText}`, `Break down into actionable daily tasks`, `Execute the main phase and build prototype`, `Review, fix errors, and finalize`];
+            }
+
+            const colors = ['emerald', 'indigo', 'purple', 'pink', 'orange'];
+            return steps.map((step, index) => {
+                return { id: Date.now() + index, text: step, done: false, color: colors[index % colors.length] };
+            });
+        }
+
+        function structureTask() {
+            const goal = document.getElementById('goal-input').value.trim();
+            const container = document.getElementById('roadmap-container');
+            if(!goal) return alert("Please enter a goal first!");
+
+            container.innerHTML = `
+                <div class="animate-pulse space-y-3">
+                    <div class="h-14 bg-white/50 dark:bg-zinc-800/80 rounded-2xl w-full"></div>
+                    <div class="h-14 bg-white/50 dark:bg-zinc-800/80 rounded-2xl w-3/4"></div>
+                    <div class="h-14 bg-white/50 dark:bg-zinc-800/80 rounded-2xl w-full"></div>
+                </div>
+            `;
+
+            setTimeout(() => {
+                currentTasks = generateSmartSteps(goal);
+                localStorage.setItem('aiRoadmap', JSON.stringify(currentTasks));
+                renderTasks();
+                document.getElementById('goal-input').value = ""; 
+            }, 1200);
+        }
+
+        function toggleTask(id) {
+            const taskIndex = currentTasks.findIndex(t => t.id === id);
+            if(taskIndex !== -1) {
+                currentTasks[taskIndex].done = !currentTasks[taskIndex].done;
+                localStorage.setItem('aiRoadmap', JSON.stringify(currentTasks));
+                renderTasks();
+            }
+        }
+
+        function clearRoadmap() {
+            if(confirm("Are you sure you want to clear the current roadmap?")) {
+                currentTasks = [];
+                localStorage.removeItem('aiRoadmap');
+                showEmptyState();
+            }
+        }
+
+        function renderTasks() {
+            const container = document.getElementById('roadmap-container');
+            if(currentTasks.length === 0) { showEmptyState(); return; }
+            document.getElementById('active-tasks-badge').classList.remove('hidden');
+            
+            container.innerHTML = currentTasks.map((task, index) => {
+                const colorCode = task.color;
+                const bgClass = task.done ? 'bg-slate-200/50 dark:bg-zinc-800/50 border-slate-300 dark:border-zinc-700 opacity-60' : `bg-white/80 dark:bg-black/40 border-${colorCode}-500/30 hover:border-${colorCode}-500/60 shadow-sm`;
+                const textClass = task.done ? 'text-slate-500 dark:text-slate-400 line-through' : `text-slate-800 dark:text-white`;
+                const numberCircle = task.done ? `<div class="w-7 h-7 rounded-full bg-slate-300 dark:bg-slate-600 flex items-center justify-center text-[10px] text-slate-600 dark:text-white font-bold">✓</div>` : `<div class="w-7 h-7 rounded-full bg-${colorCode}-500/10 border-2 border-${colorCode}-500 flex items-center justify-center text-xs text-${colorCode}-600 dark:text-${colorCode}-400 font-black">${index + 1}</div>`;
+
+                return `
+                <div onclick="toggleTask(${task.id})" class="p-4 ${bgClass} border rounded-2xl flex items-center gap-4 group transition cursor-pointer backdrop-blur-sm">
+                    ${numberCircle}
+                    <span class="text-sm font-bold ${textClass}">${task.text}</span>
+                </div>
+                `;
+            }).join('');
+        }
+    </script>
+</body>
+</html>

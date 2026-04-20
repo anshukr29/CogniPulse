@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en" id="root">
+<head>
+    <meta charset="UTF-8">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <title>CogniPulse - Chat</title>
+    
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+    <script>
+        if (localStorage.getItem('theme') === 'dark') { document.documentElement.classList.add('dark'); }
+        tailwind.config = { darkMode: 'class' }
+    </script>
+    <style>
+        @keyframes gradient-move {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        .animate-bg {
+            background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
+            background-size: 400% 400%;
+            animation: gradient-move 15s ease infinite;
+        }
+        .dark .animate-bg {
+            background: linear-gradient(-45deg, #0f172a, #1e1b4b, #312e81, #1e1b4b);
+            background-size: 400% 400%;
+        }
+        .glass {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+        .dark .glass {
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+        }
+
+        @keyframes gemini-breathe {
+            0%, 100% { transform: scale(1); opacity: 0.7; filter: blur(2px); }
+            50% { transform: scale(1.4); opacity: 1; filter: blur(6px); }
+        }
+        .gemini-orb {
+            animation: gemini-breathe 1.8s infinite ease-in-out;
+            background: linear-gradient(45deg, #4285f4, #9b72cb, #d96570, #f4af4a);
+        }
+
+        .markdown-body p { margin-bottom: 0.75rem; line-height: 1.6; }
+        .markdown-body ul { list-style-type: disc; margin-left: 1.5rem; margin-bottom: 0.75rem; }
+        .markdown-body ol { list-style-type: decimal; margin-left: 1.5rem; margin-bottom: 0.75rem; }
+        .markdown-body li { margin-bottom: 0.3rem; }
+        .markdown-body strong { font-weight: 900; color: #818cf8; } 
+        .markdown-body pre { background: rgba(0, 0, 0, 0.4); padding: 1rem; border-radius: 0.75rem; overflow-x: auto; margin-bottom: 1rem; border: 1px solid rgba(255,255,255,0.1); }
+        .markdown-body code { font-family: monospace; color: #c084fc; background: rgba(0, 0, 0, 0.2); padding: 0.2rem 0.4rem; border-radius: 0.25rem; font-size: 0.9em; }
+        .markdown-body pre code { background: transparent; padding: 0; color: #e2e8f0; font-size: 0.85em; }
+        .markdown-body h1, .markdown-body h2, .markdown-body h3 { font-weight: 900; margin-top: 1.5rem; margin-bottom: 0.5rem; color: #fff; }
+    </style>
+</head>
+<body class="animate-bg flex h-screen p-4 gap-4 transition-all duration-700 font-sans">
+    
+    <aside class="w-64 glass rounded-3xl p-6 flex flex-col border border-white/20 dark:border-white/10 shadow-2xl">
+        <h1 class="text-2xl font-black text-indigo-600 dark:text-indigo-400 mb-10 tracking-tighter">CogniPulse</h1>
+        <nav class="flex-1 space-y-2 text-sm font-bold text-slate-700 dark:text-slate-300">
+            <a href="index.html" class="flex items-center gap-3 p-3 rounded-xl hover:bg-white/40 dark:hover:bg-white/10 transition">📊 Dashboard</a>
+            <a href="chat.html" class="flex items-center gap-3 p-3 rounded-xl bg-indigo-600 text-white shadow-lg">🧠 AI Chat</a>
+            <button onclick="newChat()" class="w-full flex items-center gap-3 p-3 rounded-xl border-2 border-dashed border-indigo-400/40 text-indigo-700 dark:text-indigo-300 hover:bg-white/40 mt-4 transition">➕ New Chat</button>
+            <a href="memory.html" class="flex items-center gap-3 p-3 rounded-xl hover:bg-white/40 dark:hover:bg-white/10 transition">📜 Memory Logs</a>
+            <a href="profile.html" class="flex items-center gap-3 p-3 rounded-xl hover:bg-white/40 dark:hover:bg-white/10 transition">👤 Profile</a>
+        </nav>
+        <button onclick="toggleTheme()" class="mt-auto p-3 glass rounded-xl font-bold text-xs dark:text-white border border-white/20">
+            <span id="theme-icon">🌙</span> Switch Theme
+        </button>
+    </aside>
+
+    <main class="flex-1 glass rounded-3xl border border-white/20 dark:border-white/10 flex flex-col overflow-hidden shadow-2xl relative">
+        <div id="chat-box" class="flex-1 p-6 overflow-y-auto space-y-6 scroll-smooth">
+            <div id="initial-loader" class="text-center text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase tracking-widest py-10 animate-pulse">Neural Link Establishing...</div>
+        </div>
+        
+        <div id="loader" class="hidden px-6 text-[10px] font-bold text-indigo-500 italic animate-pulse pb-2">CogniPulse is processing...</div>
+        
+        <div class="relative p-4 bg-white/30 dark:bg-black/20 border-t border-white/20">
+            
+            <div id="attachment-preview" class="hidden absolute bottom-full left-6 mb-3 bg-white dark:bg-slate-800 p-2 rounded-xl border border-slate-200 dark:border-slate-700 shadow-2xl items-center gap-3 animate-in fade-in slide-in-from-bottom-2">
+                <img id="preview-img" src="" class="h-12 w-12 object-cover rounded-lg border border-slate-300 dark:border-slate-600">
+                <div class="flex flex-col">
+                    <span class="text-xs font-bold text-slate-700 dark:text-white">Image Attached</span>
+                    <button type="button" onclick="removeAttachment()" class="text-red-500 hover:text-red-600 text-[10px] font-black uppercase tracking-widest text-left">✖ Remove</button>
+                </div>
+            </div>
+
+            <form onsubmit="event.preventDefault(); handleSend();" class="flex gap-2 bg-white/50 dark:bg-zinc-900/50 p-2 rounded-2xl border border-white/30 dark:border-white/10 shadow-inner items-center">
+                
+                <input type="file" id="file-upload" accept="image/*" class="hidden" onchange="handleFileUpload(event)">
+                <button type="button" onclick="document.getElementById('file-upload').click()" class="p-2 text-slate-500 hover:text-indigo-500 transition-colors" title="Upload Image / Camera">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M18.375 12.739l-7.693 7.693a4.5 4.5 0 01-6.364-6.364l10.94-10.94A3 3 0 1119.5 7.372L8.552 18.32m.009-.01l-.01.01m5.699-9.941l-7.81 7.81a1.5 1.5 0 002.112 2.13" />
+                    </svg>
+                </button>
+
+                <button type="button" onclick="startVoiceSync()" id="mic-btn" class="relative p-2 transition-all active:scale-90 flex items-center justify-center group">
+                    <div id="mic-static" class="transition-all duration-300 text-slate-500 hover:text-indigo-500">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 14C13.66 14 15 12.66 15 11V5C15 3.34 13.66 2 12 2C10.34 2 9 3.34 9 5V11C9 12.66 10.34 14 12 14Z" fill="currentColor"/><path d="M17 11C17 13.76 14.76 16 12 16C9.24 16 7 13.76 7 11H5C5 14.53 7.61 17.43 11 17.92V21H13V17.92C16.39 17.43 19 14.53 19 11H17Z" fill="currentColor"/></svg>
+                    </div>
+                    <div id="mic-active" class="hidden absolute inset-0 items-center justify-center">
+                        <div class="w-5 h-5 rounded-full gemini-orb shadow-lg shadow-indigo-500/50"></div>
+                    </div>
+                </button>
+
+                <input id="user-input" type="text" autocomplete="off" placeholder="Pulse your message or prompt..." class="flex-1 bg-transparent px-2 outline-none dark:text-white placeholder-slate-500 font-medium">
+                
+                <button type="button" onclick="generateAIImage()" class="px-3 py-2 bg-gradient-to-r from-pink-500/10 to-purple-500/10 text-purple-600 dark:text-purple-400 hover:bg-purple-500/20 rounded-xl font-bold text-xs transition border border-purple-500/30 flex items-center gap-1 shadow-sm whitespace-nowrap" title="Generate Image from Text">
+                    🎨 <span class="hidden md:inline">Gen Image</span>
+                </button>
+
+                <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2.5 rounded-xl font-bold transition active:scale-95 shadow-lg ml-1">Pulse</button>
+            </form>
+        </div>
+    </main>
+
+    <script>
+        const UID = localStorage.getItem('uid') || "test_user"; // Testing bypass
+        if(!localStorage.getItem('uid')) window.location.href = 'login.html';
+
+        // --- ATTACHMENT LOGIC (VISION API PREP) ---
+        let attachedImageBase64 = null;
+
+        function handleFileUpload(event) {
+            const file = event.target.files[0];
+            if(!file) return;
+
+            // Convert image to Base64 to send to backend later
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                attachedImageBase64 = e.target.result;
+                document.getElementById('preview-img').src = attachedImageBase64;
+                document.getElementById('attachment-preview').classList.remove('hidden');
+                document.getElementById('attachment-preview').classList.add('flex');
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function removeAttachment() {
+            attachedImageBase64 = null;
+            document.getElementById('file-upload').value = "";
+            document.getElementById('attachment-preview').classList.add('hidden');
+            document.getElementById('attachment-preview').classList.remove('flex');
+        }
+
+        // --- AI IMAGE GENERATION (POLLINATIONS API - 100% FREE) ---
+        function generateAIImage() {
+            const input = document.getElementById('user-input');
+            const prompt = input.value.trim();
+            
+            if(!prompt) {
+                return alert("Pehle textbox me likho ki kya image banani hai! (e.g., 'A futuristic car in space')");
+            }
+
+            input.value = "";
+            appendMessage('user', `🎨 Generate Image: ${prompt}`);
+            
+            document.getElementById('loader').innerText = "Synthesizing AI Masterpiece...";
+            document.getElementById('loader').classList.remove('hidden');
+
+            // Pollinations.ai generates images via simple URL. No API Key required!
+            const encodedPrompt = encodeURIComponent(prompt);
+            const randomSeed = Math.floor(Math.random() * 100000);
+            const imageUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?seed=${randomSeed}&width=512&height=512&nologo=true`;
+
+            // Wait a second to simulate processing, then show image
+            setTimeout(() => {
+                const imgHtml = `
+                    <div class="mt-2 relative group">
+                        <img src="${imageUrl}" alt="${prompt}" class="rounded-xl w-full max-w-[300px] shadow-lg border border-white/20 transition-transform group-hover:scale-[1.02]">
+                        <a href="${imageUrl}" download target="_blank" class="absolute bottom-2 right-2 bg-black/60 text-white p-2 rounded-lg backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity text-xs font-bold">Download</a>
+                    </div>
+                `;
+                appendMessage('ai', `Here is your generated image for **"${prompt}"**:\n\n${imgHtml}`);
+                document.getElementById('loader').classList.add('hidden');
+            }, 2000);
+        }
+
+        // --- VOICE LOGIC ---
+        const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+        recognition.lang = 'en-US';
+        recognition.interimResults = false;
+
+        function startVoiceSync() {
+            try {
+                recognition.start();
+                document.getElementById('mic-static').classList.add('hidden');
+                document.getElementById('mic-active').classList.remove('hidden');
+                document.getElementById('mic-active').classList.add('flex');
+                document.getElementById('loader').innerText = "Neural link active... Listening";
+                document.getElementById('loader').classList.remove('hidden');
+            } catch (e) { console.log("Mic error"); }
+        }
+
+        function stopVoiceUI() {
+            document.getElementById('mic-static').classList.remove('hidden');
+            document.getElementById('mic-active').classList.add('hidden');
+            document.getElementById('mic-active').classList.remove('flex');
+            document.getElementById('loader').classList.add('hidden');
+        }
+
+        recognition.onresult = (event) => {
+            document.getElementById('user-input').value = event.results[0][0].transcript;
+            stopVoiceUI();
+            handleSend();
+        };
+
+        recognition.onspeechend = () => { recognition.stop(); stopVoiceUI(); };
+        recognition.onerror = () => { recognition.stop(); stopVoiceUI(); };
+
+        // --- MESSAGE RENDERER ---
+        function appendMessage(role, text, imageBase64 = null) {
+            const box = document.getElementById('chat-box');
+            
+            if(role === 'user') {
+                let imgTag = imageBase64 ? `<img src="${imageBase64}" class="w-32 h-32 object-cover rounded-lg mb-2 border border-white/20">` : '';
+                box.innerHTML += `
+                <div class="flex justify-end animate-in fade-in slide-in-from-right-4 duration-500">
+                    <div class="bg-indigo-600/90 text-white p-4 rounded-2xl rounded-tr-none max-w-[75%] shadow-xl backdrop-blur-sm border border-white/10">
+                        ${imgTag}
+                        ${text}
+                    </div>
+                </div>`;
+            } else {
+                const formattedHTML = marked.parse(text); 
+                box.innerHTML += `
+                <div class="flex justify-start animate-in fade-in slide-in-from-left-4 duration-500">
+                    <div class="glass dark:bg-zinc-800/80 dark:text-white p-5 rounded-2xl rounded-tl-none max-w-[85%] shadow-xl border border-white/20 markdown-body text-sm leading-relaxed">
+                        ${formattedHTML}
+                    </div>
+                </div>`;
+            }
+            box.scrollTop = box.scrollHeight;
+        }
+
+        // --- MAIN SEND LOGIC ---
+        async function handleSend() {
+            const input = document.getElementById('user-input');
+            const text = input.value.trim();
+            
+            // Allow sending if there's either text OR an attached image
+            if(!text && !attachedImageBase64) return;
+            
+            input.value = "";
+            
+            // Save current image reference and clear UI attachment immediately
+            const currentImgBase64 = attachedImageBase64;
+            removeAttachment();
+
+            appendMessage('user', text || "📷 Sent an image.", currentImgBase64);
+            
+            document.getElementById('loader').innerText = "CogniPulse is processing...";
+            document.getElementById('loader').classList.remove('hidden');
+            
+            try {
+                const payload = { 
+                    message: text, 
+                    user_id: UID 
+                };
+                
+                // IMPORTANT FOR BACKEND: If image exists, send it in payload
+                if(currentImgBase64) {
+                    payload.image_data = currentImgBase64; // Handle this in your Node.js backend!
+                }
+
+                const res = await fetch('http://localhost:8000/api/chat', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(payload)
+                });
+                
+                const data = await res.json();
+                appendMessage('ai', data.reply);
+                
+            } catch (e) { 
+                appendMessage('ai', "Neural link offline. Ensure backend is running."); 
+            } finally { 
+                document.getElementById('loader').classList.add('hidden'); 
+            }
+        }
+
+        async function loadHistory() {
+            try {
+                const res = await fetch(`http://localhost:8000/api/logs/${UID}`);
+                const data = await res.json();
+                document.getElementById('initial-loader')?.remove();
+                data.reverse().forEach(log => {
+                    appendMessage('user', log.user);
+                    appendMessage('ai', log.ai);
+                });
+            } catch (err) { }
+        }
+
+        function toggleTheme() {
+            const isDark = document.documentElement.classList.toggle('dark');
+            localStorage.setItem('theme', isDark ? 'dark' : 'light');
+            document.getElementById('theme-icon').innerText = isDark ? '☀️' : '🌙';
+        }
+
+        function newChat() {
+            if(!confirm("Fresh session? Logs safe in Memory.")) return;
+            document.getElementById('chat-box').innerHTML = "";
+        }
+
+        window.onload = loadHistory;
+    </script>
+</body>
+</html>
